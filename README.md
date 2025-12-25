@@ -7,21 +7,10 @@ product dataset.
 The focus of this assignment is system design, clear agent boundaries,
 and automation flow rather than UI or domain expertise.
 
-## System Flow Diagram
+## System Architecture Diagram
 
-Product Data  
-↓  
-ProductParserAgent  
-↓  
-QuestionGeneratorAgent  
-↓  
-FAQAgent  
-↓  
-ProductPageAgent  
-↓  
-ComparisonAgent  
-↓  
-JSON Output Files  
+![System Architecture Diagram](docs/diagrams/system_flow.png)
+ 
 
 ## Key Design Decisions
 
