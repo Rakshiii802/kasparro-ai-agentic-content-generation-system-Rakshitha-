@@ -1,16 +1,7 @@
 {
   "page_type": "product",
-  "name": "GlowBoost Vitamin C Serum",
-  "concentration": "10% Vitamin C",
-  "ingredients": [
-    "Vitamin C",
-    "Hyaluronic Acid"
-  ],
-  "benefits": [
-    "Brightening",
-    "Fades dark spots"
-  ],
-  "usage": "Apply 2\u20133 drops in the morning before sunscreen",
-  "skin_type": "Suitable for Oily, Combination skin types.",
-  "price": "\u20b9699"
+  "name": "Kasparro Face Wash",
+  "category": null,
+  "price": "\u20b9299",
+  "features": []
 }

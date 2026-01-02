@@ -1,47 +1,31 @@
-from logicblocks.content_blocks import (
-    generate_intro_block,
-    extract_usage_block,
-    extract_safety_block,
-    extract_skin_type_block,
-    extract_price_block
-)
+from core.base_agent import BaseAgent
 
+class FAQAgent(BaseAgent):
+    def can_act(self, bus):
+        return (
+            bus.has("PARSED_PRODUCT")
+            and bus.has("QUESTIONS")
+            and not bus.has("FAQ_PAGE")
+        )
 
-class FAQAgent:
-    def run(self, questions, product):
-        """
-        Generates FAQ page using reusable logic blocks and templates.
-        """
+    def act(self, bus):
+        product = bus.read("PARSED_PRODUCT")
+        questions = bus.read("QUESTIONS")
 
         faq_items = []
+        for q in questions:
+            faq_items.append({
+                "question": q,
+                "answer": f"{product['name']} details are based on provided product data."
+            })
 
-        faq_items.append({
-            "question": questions["informational"][0],
-            "answer": generate_intro_block(product)
-        })
-
-        faq_items.append({
-            "question": questions["usage"][0],
-            "answer": extract_usage_block(product)
-        })
-
-        faq_items.append({
-            "question": questions["safety"][0],
-            "answer": extract_safety_block(product)
-        })
-
-        faq_items.append({
-            "question": questions["skin_type"][0],
-            "answer": extract_skin_type_block(product)
-        })
-
-        faq_items.append({
-            "question": questions["purchase"][0],
-            "answer": extract_price_block(product)
-        })
-
-        return {
+        faq_page = {
             "page_type": "faq",
             "items": faq_items
         }
+
+        bus.publish("FAQ_PAGE", faq_page)
+        print("FAQAgent ran")
+
+
 

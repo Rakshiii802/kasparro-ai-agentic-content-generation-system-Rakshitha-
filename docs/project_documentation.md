@@ -1,172 +1,174 @@
-# Multi-Agent Content Generation System
-
-## Problem Statement
-
-The objective of this assignment is to design and implement a modular, agent-based automation system that can take a fixed product dataset as input and automatically generate structured, machine-readable content pages.
-
-The system must:
-- operate only on the given product data
-- avoid external research or manual content writing
-- generate reusable, scalable content using automation
-- demonstrate clear agent boundaries and orchestration
-
-This project focuses on system design, automation logic, and agent coordination rather than domain expertise or UI development.
+# Multi-Agent Content Generation System  
+(Project Documentation)
 
 ---
 
-## Solution Overview
+## 1. Purpose of the System
 
-The solution is implemented as a multi-agent content generation pipeline. Each agent is responsible for a single, well-defined task, and an orchestrator controls the execution flow.
+The purpose of this system is to automatically generate multiple structured content artifacts from a given product dataset using **autonomous agents**.
 
-The system processes a product dataset and automatically generates:
-- a FAQ page
-- a Product Description page
-- a Comparison page (against a fictional product)
+The focus of the assignment is not on content quality or UI rendering, but on designing a system that demonstrates:
+- agent independence
+- dynamic coordination
+- separation of responsibilities
+- non-static execution flow
 
-All outputs are generated in clean, structured JSON format, making them suitable for downstream machine consumption.
-
----
-
-## Scope & Assumptions
-
-### Scope
-- The system operates strictly on the provided product dataset.
-- All generated content is derived from the input data using rule-based logic.
-- The system is designed to be extensible for additional products or page types.
-
-### Assumptions
-- No external data sources or APIs are used.
-- The fictional comparison product is intentionally simple and structured.
-- Content quality is secondary to system design and automation correctness.
+The system generates machine-readable outputs that can be consumed by downstream applications.
 
 ---
 
-## System Design
+## 2. Design Motivation
 
-## System Design
+A traditional step-by-step script or pipeline is not suitable for this problem because it tightly couples execution order with logic.
 
-The system is designed as a modular, multi-agent automation pipeline that converts a structured product dataset into multiple machine-readable content pages.
+Instead, this system is designed as a **multi-agent architecture**, where:
+- each agent is responsible for exactly one concern
+- agents do not directly invoke each other
+- coordination happens indirectly through shared state
 
-Instead of implementing all logic in a single script, the system is decomposed into independent agents, each responsible for a specific stage of content generation. A central orchestrator manages execution order and data flow between agents.
-
-This design ensures clarity, reusability, and easy extensibility.
-
----
-
-### Architecture Overview
-
-The architecture consists of the following components:
-
-- A single product data source
-- Multiple specialized agents
-- A centralized orchestrator
-- JSON-based output files
-
-Each agent operates independently and communicates only through structured inputs and outputs.
+This allows the system to scale, evolve, and remain modular without rewriting orchestration logic.
 
 ---
 
-### Agent Responsibilities
+## 3. Core Architectural Components
 
-**ProductParserAgent**  
-Responsible for receiving the raw product dataset and converting it into a clean internal representation. This abstraction allows future validation or preprocessing without affecting downstream agents.
+The system consists of three core components:
 
-**QuestionGeneratorAgent**  
-Generates categorized user questions (informational, usage, safety, purchase, etc.) based on the product data. This separates user intent generation from content generation.
+### Agents
+Independent units that perform a single task and publish their results.
 
-**FAQAgent**  
-Consumes the generated questions and product data to produce a structured FAQ page. All FAQ-related formatting and logic are encapsulated within this agent.
+### MessageBus
+A shared state mechanism that enables indirect communication between agents.
 
-**ProductPageAgent**  
-Generates the product description page using only product-level information such as ingredients, benefits, usage, and price.
+### Orchestrator
+A lightweight scheduler that repeatedly evaluates which agents are ready to act.
 
-**ComparisonAgent**  
-Creates a comparison page between the main product and a fictional alternative. This agent isolates comparative logic from single-product content generation.
+The orchestrator does **not** contain domain logic and does **not** enforce execution order.
 
 ---
 
-### Orchestration Flow
+## 4. Agent Autonomy Model
 
-A centralized orchestrator controls the execution flow of the system. Agents are executed in a fixed, deterministic order, and outputs from one agent are passed as inputs to the next where required.
+Each agent implements the same conceptual contract:
 
-The execution flow is as follows:
+- **can_act(bus)**  
+  Determines whether the agent has sufficient data available to perform its task.
 
-1. Load product data
-2. Parse product data
-3. Generate user questions
-4. Generate FAQ page
-5. Generate product page
-6. Generate comparison page
-7. Persist all outputs as JSON files
+- **act(bus)**  
+  Executes the agent’s responsibility and publishes its output to the MessageBus.
 
-This step-based pipeline ensures predictable execution and avoids tight coupling between agents.
+Agents decide **independently** when they can act.  
+No agent has knowledge of other agents or their internal logic.
 
 ---
 
-### Design Characteristics
-
-- **Single Responsibility**: Each agent performs exactly one task.
-- **Loose Coupling**: Agents do not depend on each other’s internal logic.
-- **Centralized Control**: All execution is managed by the orchestrator.
-- **Deterministic Output**: The same input always produces the same output.
-- **Extensible Architecture**: New agents or page types can be added without modifying existing agents.
-
-This design closely resembles real-world automation and content generation pipelines used in production systems.
-
----
-
-## Agent Responsibilities
+## 5. Agent Responsibilities
 
 ### ProductParserAgent
-- Input: raw product data
-- Output: cleaned internal product representation
-- Responsibility: prepare data for downstream agents
+- **Consumes:** RAW_PRODUCT  
+- **Produces:** PARSED_PRODUCT  
+- **Responsibility:** Normalize and structure raw product input for downstream use.
+
+---
 
 ### QuestionGeneratorAgent
-- Input: parsed product data
-- Output: categorized user questions
-- Responsibility: simulate user intent generation
+- **Consumes:** PARSED_PRODUCT  
+- **Produces:** QUESTIONS  
+- **Responsibility:** Generate user-style informational questions from product data.
+
+---
 
 ### FAQAgent
-- Input: questions + product data
-- Output: FAQ page JSON
-- Responsibility: generate structured Q&A content
+- **Consumes:** PARSED_PRODUCT, QUESTIONS  
+- **Produces:** FAQ_PAGE  
+- **Responsibility:** Assemble structured FAQ content in JSON format.
+
+---
 
 ### ProductPageAgent
-- Input: product data
-- Output: product description JSON
-- Responsibility: assemble product-level information
+- **Consumes:** PARSED_PRODUCT  
+- **Produces:** PRODUCT_PAGE  
+- **Responsibility:** Generate a structured product description page.
+
+---
 
 ### ComparisonAgent
-- Input: product data
-- Output: comparison page JSON
-- Responsibility: compare the product against a fictional alternative
+- **Consumes:** PARSED_PRODUCT  
+- **Produces:** COMPARISON_PAGE  
+- **Responsibility:** Generate a comparison between the main product and a fictional alternative.
+
+Each agent owns exactly one output and does not modify outputs owned by other agents.
 
 ---
 
-## Automation Flow
+## 6. Message-Based Coordination
 
-1. The orchestrator loads the product dataset.
-2. ProductParserAgent processes the raw data.
-3. QuestionGeneratorAgent creates categorized questions.
-4. FAQAgent generates the FAQ page.
-5. ProductPageAgent generates the product page.
-6. ComparisonAgent generates the comparison page.
-7. The orchestrator saves all outputs as JSON files.
+All coordination between agents occurs through a shared **MessageBus**.
 
-This flow represents a directed, step-based automation pipeline.
+- Agents publish outputs as named artifacts
+- Other agents react when required artifacts become available
+- There is no direct agent-to-agent communication
+
+This design ensures:
+- loose coupling
+- modularity
+- easy extensibility
+- true agent independence
 
 ---
 
-## Output Structure
+## 7. Orchestrator Behavior
 
-The system generates three machine-readable JSON files:
+The orchestrator acts as a **generic scheduler**.
 
-- faq.json  
-- product_page.json  
-- comparison_page.json  
+Its responsibilities are limited to:
+- iterating over registered agents
+- allowing an agent to execute when `can_act()` returns true
+- continuing until no agent can make further progress
 
-Each file follows a consistent, structured schema and can be consumed by other systems without further processing.
+The orchestrator:
+- does not know what agents produce
+- does not manage dependencies manually
+- does not enforce a predefined execution sequence
 
-The output directory serves as the final interface between the agentic system and downstream applications.
+Execution order **emerges dynamically** based on data availability.
+
+---
+
+## 8. Execution Model (Emergent Flow)
+
+The system does not follow a fixed, step-based pipeline.
+
+Instead:
+- agents continuously evaluate shared state
+- new outputs enable other agents to act
+- multiple agents may become ready in different orders depending on system state
+
+This results in **dynamic, condition-driven execution** rather than static control flow.
+
+---
+
+## 9. Outputs
+
+The system produces deterministic, machine-readable JSON outputs:
+
+- `faq.json`
+- `product_page.json`
+- `comparison_page.json`
+
+These outputs are intentionally separated from presentation or UI concerns.
+
+---
+
+## 10. Summary
+
+This system demonstrates:
+
+- clear separation of agent responsibilities
+- autonomous agent behavior
+- dynamic coordination through shared state
+- orchestration without embedded business logic
+
+The architecture reflects the intended definition of a **true multi-agent system**, avoiding static pipelines or manually wired execution flow.
+
 

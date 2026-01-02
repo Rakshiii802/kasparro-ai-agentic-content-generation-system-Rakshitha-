@@ -1,22 +1,21 @@
-class QuestionGeneratorAgent:
-    def run(self, product):
-        """
-        Generates categorized user questions based on product data.
-        """
-        return {
-            "informational": [
-                f"What is {product['name']}?"
-            ],
-            "usage": [
-                "How should I use this product?"
-            ],
-            "safety": [
-                "Are there any side effects?"
-            ],
-            "skin_type": [
-                "Is this product suitable for oily or combination skin?"
-            ],
-            "purchase": [
-                "What is the price of this product?"
-            ]
-        }
+from core.base_agent import BaseAgent
+
+class QuestionGeneratorAgent(BaseAgent):
+    def can_act(self, bus):
+        # Can act only if product is parsed and questions not generated yet
+        return bus.has("PARSED_PRODUCT") and not bus.has("QUESTIONS")
+
+    def act(self, bus):
+        product = bus.read("PARSED_PRODUCT")
+
+        questions = [
+            f"What is {product['name']}?",
+            f"What are the key ingredients of {product['name']}?",
+            f"Who should use {product['name']}?",
+            f"How is {product['name']} different from alternatives?",
+        ]
+
+        bus.publish("QUESTIONS", questions)
+        print(" QuestionGeneratorAgent ran")
+
+

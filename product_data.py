@@ -1,10 +1,9 @@
-PRODUCT_DATA = {
-    "name": "GlowBoost Vitamin C Serum",
-    "concentration": "10% Vitamin C",
-    "skin_type": ["Oily", "Combination"],
-    "ingredients": ["Vitamin C", "Hyaluronic Acid"],
-    "benefits": ["Brightening", "Fades dark spots"],
-    "usage": "Apply 2–3 drops in the morning before sunscreen",
-    "side_effects": "Mild tingling for sensitive skin",
-    "price": "₹699"
+product_data = {
+    "name": "Kasparro Face Wash",
+    "benefits": ["cleansing", "oil control", "acne prevention"],
+    "usage": "Use twice daily on wet face.",
+    "skin_type": ["oily", "combination"],
+    "side_effects": "No known side effects",
+    "price": "₹299"
 }
+
